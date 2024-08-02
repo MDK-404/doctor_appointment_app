@@ -1,34 +1,52 @@
 import 'package:doctor_appointment_app/doctors_management/otp_verification.dart';
+import 'package:doctor_appointment_app/doctors_management/provider/userprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+// Ensure this import is correct for your project structure
 
-class SignUpScreen extends StatefulWidget {
+class DoctorSignUpScreen extends StatefulWidget {
   @override
-  _SignUpScreenState createState() => _SignUpScreenState();
+  _DoctorSignUpScreenState createState() => _DoctorSignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _DoctorSignUpScreenState extends State<DoctorSignUpScreen> {
   final _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
-  String? _name, _email, _password;
+  String? _email, _password, _doctorName;
+  bool _isLoading = false;
 
   void _signUp() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      setState(() {
+        _isLoading = true;
+      });
       try {
         UserCredential userCredential =
             await _auth.createUserWithEmailAndPassword(
           email: _email!,
           password: _password!,
         );
-        await userCredential.user!.sendEmailVerification();
-        Navigator.of(context).pushReplacement(
+        User? user = userCredential.user;
+        await user!.updateDisplayName(_doctorName);
+        await user.sendEmailVerification();
+
+        Provider.of<UserProvider>(context, listen: false).setUser(user);
+
+        setState(() {
+          _isLoading = false;
+        });
+        Navigator.pushReplacement(
+          context,
           MaterialPageRoute(
-            builder: (context) => VerificationScreen(email: _email!),
-          ),
+              builder: (context) => EmailVerificationScreen(email: _email!)),
         );
       } catch (e) {
         print(e);
+        setState(() {
+          _isLoading = false;
+        });
         // Handle error
       }
     }
@@ -39,12 +57,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Doctor Sign Up'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
       ),
       body: Stack(
         fit: StackFit.expand,
@@ -58,7 +70,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               gradient: LinearGradient(
                 colors: [
                   Colors.lightBlue.shade100.withOpacity(0.3),
-                  Colors.lightBlue.shade300.withOpacity(0.3),
+                  Colors.lightBlue.shade300.withOpacity(0.3)
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -76,17 +88,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         children: [
                           TextFormField(
                             decoration: InputDecoration(
-                              labelText: 'Name',
+                              labelText: 'Doctor Name',
                               filled: true,
-                              fillColor: Colors.black.withOpacity(0.8),
+                              fillColor: Colors.white.withOpacity(0.8),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
                             ),
                             validator: (value) =>
                                 value!.isEmpty ? 'Enter your name' : null,
-                            onSaved: (value) => _name = value,
-                            style: TextStyle(color: Colors.black),
+                            onSaved: (value) => _doctorName = value,
                           ),
                           SizedBox(height: 20),
                           TextFormField(
@@ -101,7 +112,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             validator: (value) =>
                                 value!.isEmpty ? 'Enter your email' : null,
                             onSaved: (value) => _email = value,
-                            style: TextStyle(color: Colors.black),
                           ),
                           SizedBox(height: 20),
                           TextFormField(
@@ -114,29 +124,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
                             ),
                             validator: (value) =>
-                                value!.length < 6 ? 'Password too short' : null,
+                                value!.isEmpty ? 'Enter your password' : null,
                             onSaved: (value) => _password = value,
                             obscureText: true,
-                            style: TextStyle(color: Colors.black),
                           ),
                           SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: _signUp,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightBlue.shade300,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 100.0,
-                                vertical: 15.0,
-                              ),
-                            ),
-                            child: Text(
-                              'Sign Up',
-                              style: TextStyle(fontSize: 18.0),
-                            ),
-                          ),
+                          _isLoading
+                              ? CircularProgressIndicator()
+                              : ElevatedButton(
+                                  onPressed: _signUp,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.lightBlue.shade300,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 100.0, vertical: 15.0),
+                                  ),
+                                  child: Text(
+                                    'Sign Up',
+                                    style: TextStyle(fontSize: 18.0),
+                                  ),
+                                ),
                         ],
                       ),
                     ),

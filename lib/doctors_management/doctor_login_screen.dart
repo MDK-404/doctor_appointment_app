@@ -1,6 +1,10 @@
+import 'package:doctor_appointment_app/doctors_management/doctor_profile.dart';
 import 'package:doctor_appointment_app/doctors_management/doctor_signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:doctor_appointment_app/doctors_management/provider/userprovider.dart';
+import 'package:provider/provider.dart';
 
 class DoctorLoginScreen extends StatefulWidget {
   @override
@@ -8,29 +12,79 @@ class DoctorLoginScreen extends StatefulWidget {
 }
 
 class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
-  final _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   final _formKey = GlobalKey<FormState>();
   String? _email, _password;
+  bool _isLoading = false;
 
-  void _login() async {
+  void _loginWithEmail() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      setState(() {
+        _isLoading = true;
+      });
+
       try {
         UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: _email!,
           password: _password!,
         );
-        if (userCredential.user!.emailVerified) {
-          // Navigate to the doctor's profile or home screen
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Please verify your email first.'),
-          ));
-        }
+        User? user = userCredential.user;
+
+        Provider.of<UserProvider>(context, listen: false).setUser(user);
+
+        setState(() {
+          _isLoading = false;
+        });
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => DoctorProfileScreen()));
       } catch (e) {
         print(e);
-        // Handle error
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Login failed.'),
+        ));
       }
+    }
+  }
+
+  void _loginWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser!.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      Provider.of<UserProvider>(context, listen: false).setUser(user);
+
+      setState(() {
+        _isLoading = false;
+      });
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => DoctorProfileScreen()));
+    } catch (e) {
+      print(e);
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Google sign-in failed.'),
+      ));
     }
   }
 
@@ -38,13 +92,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        title: Text('Doctor Login'),
       ),
       body: Stack(
         fit: StackFit.expand,
@@ -86,7 +134,6 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                             validator: (value) =>
                                 value!.isEmpty ? 'Enter your email' : null,
                             onSaved: (value) => _email = value,
-                            style: TextStyle(color: Colors.black),
                           ),
                           SizedBox(height: 20),
                           TextFormField(
@@ -102,13 +149,30 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                                 value!.isEmpty ? 'Enter your password' : null,
                             onSaved: (value) => _password = value,
                             obscureText: true,
-                            style: TextStyle(color: Colors.black),
                           ),
                           SizedBox(height: 20),
+                          _isLoading
+                              ? CircularProgressIndicator()
+                              : ElevatedButton(
+                                  onPressed: _loginWithEmail,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.lightBlue.shade300,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 100.0, vertical: 15.0),
+                                  ),
+                                  child: Text(
+                                    'Login',
+                                    style: TextStyle(fontSize: 18.0),
+                                  ),
+                                ),
+                          SizedBox(height: 20),
                           ElevatedButton(
-                            onPressed: _login,
+                            onPressed: _loginWithGoogle,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightBlue.shade300,
+                              backgroundColor: Colors.red.shade700,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
@@ -116,7 +180,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                                   horizontal: 100.0, vertical: 15.0),
                             ),
                             child: Text(
-                              'Login',
+                              'Login with Google',
                               style: TextStyle(fontSize: 18.0),
                             ),
                           ),
@@ -126,13 +190,10 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => SignUpScreen()),
+                                    builder: (context) => DoctorSignUpScreen()),
                               );
                             },
-                            child: Text(
-                              "Don't have an account? Signup",
-                              style: TextStyle(color: Colors.white),
-                            ),
+                            child: Text('Don\'t have an account? Sign Up'),
                           ),
                         ],
                       ),
