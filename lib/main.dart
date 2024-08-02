@@ -1,5 +1,6 @@
-import 'package:doctor_appointment_app/doctors_management/doctor_signup_screen.dart';
 import 'package:doctor_appointment_app/doctors_management/provider/userprovider.dart';
+import 'package:doctor_appointment_app/firebase_options.dart';
+import 'package:doctor_appointment_app/selection_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,6 +10,8 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  DefaultFirebaseOptions.currentPlatform;
   runApp(MyApp());
 }
 
@@ -22,7 +25,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: DoctorSignUpScreen(),
+        home: UserSelectionScreen(),
       ),
     );
   }

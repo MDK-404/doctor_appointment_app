@@ -172,7 +172,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                           ElevatedButton(
                             onPressed: _loginWithGoogle,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red.shade700,
+                              backgroundColor: Colors.blue,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
