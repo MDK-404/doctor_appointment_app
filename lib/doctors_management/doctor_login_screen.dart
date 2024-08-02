@@ -37,7 +37,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
         setState(() {
           _isLoading = false;
         });
-        Navigator.push(context,
+        Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => DoctorProfileScreen()));
       } catch (e) {
         print(e);
@@ -75,7 +75,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
       setState(() {
         _isLoading = false;
       });
-      Navigator.push(context,
+      Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => DoctorProfileScreen()));
     } catch (e) {
       print(e);

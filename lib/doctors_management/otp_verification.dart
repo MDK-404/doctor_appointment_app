@@ -49,7 +49,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            'assets/login.jpg',
+            'assets/Login.jpg',
             fit: BoxFit.cover,
           ),
           Container(
