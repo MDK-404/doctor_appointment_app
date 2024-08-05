@@ -1,5 +1,6 @@
-import 'package:doctor_appointment_app/doctors_management/doctor_profile.dart';
-import 'package:doctor_appointment_app/doctors_management/doctor_signup_screen.dart';
+import 'package:doctor_appointment_app/doctors_management/screens/doctor_profile.dart';
+import 'package:doctor_appointment_app/doctors_management/screens/doctor_signup_screen.dart';
+import 'package:doctor_appointment_app/doctors_management/screens/doctors_availability.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -37,8 +38,10 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
         setState(() {
           _isLoading = false;
         });
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => DoctorProfileScreen()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => DoctorAvailabilityScreen()));
       } catch (e) {
         print(e);
         setState(() {
@@ -76,7 +79,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
         _isLoading = false;
       });
       Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => DoctorProfileScreen()));
+          MaterialPageRoute(builder: (context) => DoctorAvailabilityScreen()));
     } catch (e) {
       print(e);
       setState(() {

@@ -1,4 +1,4 @@
-import 'package:doctor_appointment_app/doctors_management/doctor_login_screen.dart';
+import 'package:doctor_appointment_app/doctors_management/screens/doctor_login_screen.dart';
 import 'package:flutter/material.dart';
 
 class UserSelectionScreen extends StatelessWidget {

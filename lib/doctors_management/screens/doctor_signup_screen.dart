@@ -1,4 +1,4 @@
-import 'package:doctor_appointment_app/doctors_management/otp_verification.dart';
+import 'package:doctor_appointment_app/doctors_management/screens/otp_verification.dart';
 import 'package:doctor_appointment_app/doctors_management/provider/userprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
